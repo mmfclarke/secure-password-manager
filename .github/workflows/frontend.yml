@@ -2,22 +2,29 @@ name: Deploy Frontend
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "frontend/**"
 
+concurrency:
+  group: frontend-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, frontend-ec2]
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install & Build
+      - name: Install and build frontend
         working-directory: frontend
         run: |
           npm ci
@@ -26,14 +33,12 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_TOTP_SERVICE_URL: ${{ secrets.VITE_TOTP_SERVICE_URL }}
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.FRONTEND_EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /var/www/frontend
-            git pull origin main
-            npm ci
-            npm run build
+      - name: Deploy built frontend to Nginx web root
+        run: |
+          test -f frontend/dist/index.html
+          rm -rf /var/www/html/*
+          cp -r frontend/dist/. /var/www/html/
+
+      - name: Verify deployed frontend
+        run: |
+          test -f /var/www/html/index.html
