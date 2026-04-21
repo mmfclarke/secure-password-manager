@@ -9,7 +9,9 @@ const app = express();
 app.use(cors()); // 
 app.use(express.json()); 
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  tlsCAFile: process.env.MONGO_TLS_CA_FILE,
+})
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
