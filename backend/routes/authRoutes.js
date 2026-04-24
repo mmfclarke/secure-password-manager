@@ -2,16 +2,16 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { setupMFA, verifyMFA} = require("../controllers/authController");
+const { setupMFA, verifyMFA } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// MFA SETUP
+//  MFA SETUP
 router.post("/mfa/setup", authMiddleware, setupMFA);
 
-// MFA VERIFY
-router.post("/mfa/verify", authMiddleware, verifyMFA);
+//  MFA VERIFY 
+router.post("/mfa/verify", verifyMFA);
 
 // REGISTER
 router.post("/register", async (req, res) => {
@@ -57,9 +57,22 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    
+    console.log("LOGIN USER:", user.email, user._id);
+    console.log("MFA SECRET:", user.mfaSecret);
+
+    //  MFA check
+    if (user.mfaSecret) {
+      return res.json({
+        requireMFA: true,
+        userId: user._id
+      });
+    }
+
+    // Normal login
     const token = jwt.sign(
       { userId: user._id },
-       process.env.JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 

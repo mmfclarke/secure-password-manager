@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { timestamps: true });
+
+  // MfA secret (base32 string)
+  mfaSecret: {
+    type: String,
+  },
+});
 
 module.exports = mongoose.model("User", userSchema);
