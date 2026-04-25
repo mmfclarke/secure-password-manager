@@ -1,0 +1,13 @@
+{
+  "name": "secure-password-manager-totp",
+  "version": "1.0.0",
+  "description": "TOTP service for Secure Password Manager",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  }
+}
