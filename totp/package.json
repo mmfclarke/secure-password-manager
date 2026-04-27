@@ -1,0 +1,17 @@
+{
+"name": "secure-password-manager-totp",
+"version": "1.0.0",
+"main": "server.js",
+"scripts": {
+"start": "node server.js",
+"dev": "nodemon server.js"
+},
+"dependencies": {
+"axios": "^1.7.0",
+"cors": "^2.8.6",
+"dotenv": "^17.4.2",
+"express": "^5.2.1",
+"qrcode": "^1.5.4",
+"speakeasy": "^2.0.0"
+}
+}
