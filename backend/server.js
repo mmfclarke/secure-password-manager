@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
+const internalRoutes = require("./routes/internalRoutes");
 
 const app = express();
 
@@ -16,6 +17,7 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch((err) => console.error("MongoDB connection error:", err));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/internal", internalRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
