@@ -18,6 +18,15 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/totp', totpRoutes);
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`TOTP service running on port ${PORT}`);
-});
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("TOTP DB connected");
+
+    app.listen(PORT, () => {
+      console.log(`TOTP service running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error("DB connection error:", err);
+  });

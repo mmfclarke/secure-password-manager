@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../../backend/models/User");
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.post("/register", async (req, res) => {
 
     const user = await User.create({
       email,
-      password: hashedPassword,
+      masterPasswordHash: hashedPassword,
     });
 
     res.status(201).json({ message: "User created", user });
@@ -44,17 +44,17 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.masterPasswordHash);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     
     console.log("LOGIN USER:", user.email, user._id);
-    console.log("MFA SECRET:", user.mfaSecret);
+    console.log("TOTP SECRET:", user.totpSecret);
 
     //  MFA check
-    if (user.mfaSecret) {
+    if (user.totpSecret) {
       return res.json({
         requireMFA: true,
         userId: user._id
