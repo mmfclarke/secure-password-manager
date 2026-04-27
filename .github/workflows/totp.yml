@@ -2,29 +2,51 @@ name: Deploy TOTP Service
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "totp/**"
+      - ".github/workflows/totp.yml"
+
+concurrency:
+  group: totp-deploy
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, totp-ec2]
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.TOTP_EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /var/www/totp
-            git pull origin main
+      - name: Verify totp folder exists
+        run: |
+          test -f totp/package.json
+
+      - name: Install totp dependencies
+        working-directory: totp
+        run: |
+          if [ -f package-lock.json ]; then
             npm ci
-            pm2 restart totp || pm2 start src/index.js --name totp
+          else
+            npm install
+          fi
+
+      - name: Build totp if needed
+        working-directory: totp
+        run: |
+          npm run build --if-present
+
+      - name: Restart totp service
+        run: |
+          sudo systemctl restart secure-password-manager-totp
+
+      - name: Verify totp service is running
+        run: |
+          sudo systemctl is-active secure-password-manager-totp
