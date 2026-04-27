@@ -9,7 +9,6 @@ const app = express();
 
 app.use(cors()); 
 app.use(express.json()); 
-app.use("/api/internal", internalRoutes);
 
 mongoose.connect(process.env.MONGO_URI, {
   tlsCAFile: process.env.MONGO_TLS_CA_FILE,

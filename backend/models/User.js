@@ -12,7 +12,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   totpSecret: {
     type: String,
     default: null,

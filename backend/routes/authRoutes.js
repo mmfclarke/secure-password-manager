@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../../backend/models/User");
+const User = require("../models/User");
 
 const router = express.Router();
 
@@ -49,12 +49,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    
-    console.log("LOGIN USER:", user.email, user._id);
-    console.log("TOTP SECRET:", user.totpSecret);
-
     //  MFA check
-    if (user.totpSecret) {
+    if (user.mfaEnabled) {
       return res.json({
         requireMFA: true,
         userId: user._id
