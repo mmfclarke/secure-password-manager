@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Vault.module.css";
 import { Key, Lock, Plus, Pencil, Trash2, Copy, Eye, ExternalLink } from "lucide-react";
+import PasswordGenerator from "../components/PasswordGenerator";
 
 const MOCK_CREDENTIALS = [
   {
@@ -27,10 +28,12 @@ const FILTERS = ["All", "Personal", "Work", "Finance", "Social", "Other"];
 export default function Vault() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [showGenerator, setShowGenerator] = useState(false);
   const navigate = useNavigate();
 
   return (
     <div className={styles.page}>
+      {showGenerator && <PasswordGenerator onClose={() => setShowGenerator(false)} />}
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
@@ -41,7 +44,7 @@ export default function Vault() {
           </div>
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.headerBtn}><Key size={14} /> Generate</button>
+          <button className={styles.headerBtn} onClick={() => setShowGenerator(true)}><Key size={14} /> Generate</button>
           <button className={styles.headerBtn} onClick={() => navigate("/login")}>
             <Lock size={14} /> Lock
           </button>
