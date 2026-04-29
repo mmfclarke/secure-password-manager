@@ -21,14 +21,6 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   failedLoginAttempts: {
-    type: Number,
-    default: 0,
-  },
-  lockoutUntil: {
-    type: Date,
-    default: null,
-  },
-  failedLoginAttempts: {
   type: Number,
   default: 0,
   },
