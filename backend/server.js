@@ -5,7 +5,7 @@ const REQUIRED_ENV = [
   "MONGO_URI",
   "JWT_SECRET",
   "FRONTEND_ORIGIN",
-  "INTERNAL_SECRET"
+  "TOTP_INTERNAL_SECRET"
 ];
 
 for (const key of REQUIRED_ENV) {

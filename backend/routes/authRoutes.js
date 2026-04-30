@@ -27,11 +27,8 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({
       message: "User created",
-      user: {
-      id: user._id,
-      email: user.email
-    }
-  });
+      userId: user._id
+    });
 
   } catch (err) {
     console.error(err);
@@ -61,16 +58,17 @@ router.post("/login", async (req, res) => {
     if (user.lockoutUntil && user.lockoutUntil <= Date.now()) {
       user.failedLoginAttempts = 0;
       user.lockoutUntil = null;
+      await user.save();
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.masterPasswordHash);
 
     if (!isMatch) {
-    const updated = await User.findOneAndUpdate(
-      { _id: user._id },
-      { $inc: { failedLoginAttempts: 1 } },
-      { new: true }
+      const updated = await User.findOneAndUpdate(
+        { _id: user._id },
+        { $inc: { failedLoginAttempts: 1 } },
+        { new: true }
     );
 
     if (updated.failedLoginAttempts >= 5) {

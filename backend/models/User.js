@@ -20,14 +20,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  failedLoginAttempts: {
-  type: Number,
-  default: 0,
-  },
-  lockoutUntil: {
-  type: Date,
-  default: null,
-  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
