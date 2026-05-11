@@ -17,6 +17,7 @@ router.get("/users/:userId/totp-secret", async (req, res) => {
 
     res.json({ totpSecret: user.totpSecret });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -26,6 +27,15 @@ router.put("/users/:userId/totp", async (req, res) => {
   try {
     const { totpSecret } = req.body;
 
+    // Validate TOTP secret format
+    if (
+      typeof totpSecret !== "string" ||
+      !/^[A-Z2-7]{16,64}$/.test(totpSecret)
+    ) {
+      return res.status(400).json
+      ({ message: "Invalid TOTP secret format" 
+      });
+    }
     const user = await User.findByIdAndUpdate(
       req.params.userId,
       { totpSecret },
@@ -36,6 +46,7 @@ router.put("/users/:userId/totp", async (req, res) => {
 
     res.json({ message: "TOTP secret saved" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -52,13 +63,14 @@ router.post("/users/:userId/complete-mfa", async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user._id.toString() }, 
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
     res.json({ token });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });

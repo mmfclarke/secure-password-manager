@@ -4,14 +4,87 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+// INPUT VALIDATION 
+function validateAuthInput(body, { strongPassword }) {
+
+  // Ensure request body exists
+  if (!body || typeof body !== "object") {
+    return "Invalid request body";
+  }
+
+  const { email, password } = body;
+
+  // Prevent NoSQL injection / invalid types
+  if (typeof email !== "string" || typeof password !== "string") {
+    return "Email and password must be strings";
+  }
+
+  // Normalize email
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Empty email check
+  if (normalizedEmail.length === 0) {
+    return "Email is required";
+
+  }
+
+  // Prevent oversized email input
+  if (normalizedEmail.length > 254) {
+    return "Email is too long";
+  }
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(normalizedEmail)) {
+    return "Invalid email format";
+  }
+
+  // Password length limits
+  if (password.length < 1 || password.length > 128) {
+    return "Invalid password length";
+  }
+
+  // Strong password requirements for registration
+  if (strongPassword) {
+
+    if (password.length < 12) {
+      return "Password must be at least 12 characters long";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      return "Password must contain at least one special character";
+    }
+  }
+
+  return  {
+    email: normalizedEmail,
+    password
+  };
+}
+
 // REGISTER
 router.post("/register", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // Validate request input
+    const result = validateAuthInput(req.body, {
+      strongPassword: true
+     });
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Missing fields" });
-    }
+    // Validation failed
+    if (typeof result === "string") {
+      return res.status(400).json({ 
+        message: result
+    });
+  }
+    const { email, password } = result;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -39,7 +112,19 @@ router.post("/register", async (req, res) => {
 // LOGIN
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+
+    // Validate request input
+    const result = validateAuthInput(req.body, {
+      strongPassword: false
+     });
+
+    // Validation failed
+    if (typeof result === "string") {
+      return res.status(400).json({
+        message: result
+    });
+  }
+    const { email, password } = result;
 
     const user = await User.findOne({ email });
 
@@ -62,9 +147,18 @@ router.post("/login", async (req, res) => {
     }
 
     // Check password
-    const isMatch = await bcrypt.compare(password, user.masterPasswordHash);
+    const isMatch = await bcrypt.compare(
+      password, 
+      user.masterPasswordHash
+    );
 
     if (!isMatch) {
+
+      // Log failed attempt with email and IP
+      console.warn(
+        `Failed login attempt for ${email} from IP ${req.ip}`
+    );
+
       const updated = await User.findOneAndUpdate(
         { _id: user._id },
         { $inc: { failedLoginAttempts: 1 } },
