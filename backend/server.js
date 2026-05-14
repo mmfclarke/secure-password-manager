@@ -20,7 +20,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const mongoSanitize = require("express-mongo-sanitize");
 
 const authRoutes = require("./routes/authRoutes");
 const credentialsRoutes = require("./routes/credentialsRoutes");
@@ -40,9 +39,6 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "100kb" }));
-
-// Prevent NoSQL injection
-app.use(mongoSanitize());
 
 // Health check route
 app.get("/", (req, res) => {

@@ -25,7 +25,6 @@ function validateAuthInput(body, { strongPassword }) {
   // Empty email check
   if (normalizedEmail.length === 0) {
     return "Email is required";
-
   }
 
   // Prevent oversized email input
@@ -64,7 +63,7 @@ function validateAuthInput(body, { strongPassword }) {
     }
   }
 
-  return  {
+  return {
     email: normalizedEmail,
     password
   };
@@ -76,14 +75,12 @@ router.post("/register", async (req, res) => {
     // Validate request input
     const result = validateAuthInput(req.body, {
       strongPassword: true
-     });
+    });
 
     // Validation failed
     if (typeof result === "string") {
-      return res.status(400).json({ 
-        message: result
-    });
-  }
+      return res.status(400).json({ message: result });
+    }
     const { email, password } = result;
 
     const existingUser = await User.findOne({ email });
@@ -116,14 +113,12 @@ router.post("/login", async (req, res) => {
     // Validate request input
     const result = validateAuthInput(req.body, {
       strongPassword: false
-     });
+    });
 
     // Validation failed
     if (typeof result === "string") {
-      return res.status(400).json({
-        message: result
-    });
-  }
+      return res.status(400).json({ message: result });
+    }
     const { email, password } = result;
 
     const user = await User.findOne({ email });
@@ -153,29 +148,26 @@ router.post("/login", async (req, res) => {
     );
 
     if (!isMatch) {
-
-      // Log failed attempt with email and IP
-      console.warn(
-        `Failed login attempt for ${email} from IP ${req.ip}`
-    );
+      // Log failed login attempt with IP address
+      console.warn(`Failed login attempt from IP ${req.ip}`);
 
       const updated = await User.findOneAndUpdate(
         { _id: user._id },
         { $inc: { failedLoginAttempts: 1 } },
         { new: true }
-    );
+      );
 
-    if (updated.failedLoginAttempts >= 5) {
-      updated.lockoutUntil = Date.now() + 15 * 60 * 1000;
-      await updated.save();
+      if (updated.failedLoginAttempts >= 5) {
+        updated.lockoutUntil = Date.now() + 15 * 60 * 1000;
+        await updated.save();
 
-      return res.status(403).json({
-        message: "Account locked due to too many failed attempts."
-      });
+        return res.status(403).json({
+          message: "Account locked due to too many failed attempts.",
+        });
+      }
+
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-
-  return res.status(401).json({ message: "Invalid credentials" });
-}
     // Successful login and reset counters
     user.failedLoginAttempts = 0;
     user.lockoutUntil = null;
