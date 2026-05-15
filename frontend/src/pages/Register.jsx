@@ -17,7 +17,7 @@ export default function Register({ setMasterPassword }) {
     { key: "upper", label: "One uppercase letter", met: /[A-Z]/.test(password) },
     { key: "lower", label: "One lowercase letter", met: /[a-z]/.test(password) },
     { key: "number", label: "One number", met: /[0-9]/.test(password) },
-    { key: "special", label: "One special character", met: /[^A-Za-z0-9]/.test(password) },
+    { key: "special", label: "One special character", met: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) },
   ];
   const allMet = requirements.every((r) => r.met);
 

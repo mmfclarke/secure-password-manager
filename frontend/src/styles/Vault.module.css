@@ -497,6 +497,29 @@
   margin-top: 48px;
 }
 
+@media (max-width: 768px) {
+  .content {
+    max-width: 100%;
+  }
+
+  .searchBox {
+    width: 100%;
+    margin-right: 16px;
+  }
+
+  .formModal {
+    width: calc(100% - 32px);
+  }
+
+  .unlockModal {
+    width: calc(100% - 32px);
+  }
+
+  .confirmModal {
+    width: calc(100% - 32px);
+  }
+}
+
 @media (max-width: 640px) {
   .header {
     flex-direction: column;
