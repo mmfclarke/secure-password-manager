@@ -1,0 +1,90 @@
+name: API Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install TOTP service dependencies
+        working-directory: totp
+        run: npm ci
+
+      - name: Start backend in background
+        working-directory: backend
+        env:
+          MONGO_URI: mongodb://localhost:27017/securepm-test
+          JWT_SECRET: test-jwt-secret-for-ci-only
+          FRONTEND_ORIGIN: http://localhost:5173
+          TOTP_INTERNAL_SECRET: test-internal-secret-for-ci-only
+          PORT: 3001
+        run: |
+          npm start > /tmp/backend.log 2>&1 &
+          for i in {1..30}; do
+            if curl -sf http://localhost:3001/ > /dev/null; then
+              echo "Backend is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend failed to start within 30 seconds"
+          exit 1
+
+      - name: Start TOTP service in background
+        working-directory: totp
+        env:
+          PORT: 4000
+          BACKEND_API_URL: http://localhost:3001
+          TOTP_INTERNAL_SECRET: test-internal-secret-for-ci-only
+        run: |
+          npm start > /tmp/totp.log 2>&1 &
+          for i in {1..30}; do
+            if nc -z localhost 4000; then
+              echo "TOTP service is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "TOTP service failed to start within 30 seconds"
+          exit 1
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: npm install
+
+      - name: Run API tests
+        working-directory: tests
+        env:
+          API_BASE_URL: http://localhost:3001
+          TOTP_BASE_URL: http://localhost:4000
+          TOTP_INTERNAL_SECRET: test-internal-secret-for-ci-only
+        run: npm test
+
+      - name: Show backend logs on failure
+        if: failure()
+        run: cat /tmp/backend.log || true
+
+      - name: Show TOTP logs on failure
+        if: failure()
+        run: cat /tmp/totp.log || true

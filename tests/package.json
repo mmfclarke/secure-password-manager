@@ -1,0 +1,14 @@
+{
+  "name": "secure-password-manager-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API happy path tests for the Secure Password Manager",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "speakeasy": "^2.0.0",
+    "supertest": "^7.0.0"
+  }
+}
