@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styles from "../styles/Login.module.css";
@@ -17,15 +18,16 @@ export default function Login({ setMasterPassword }) {
       const { data } = await axios.post("/api/auth/login", { email, password });
 
       if (data.requireMFA) {
-        setMasterPassword(password);
+        flushSync(() => setMasterPassword(password));
         localStorage.setItem("userId", data.userId);
         navigate("/mfa");
       } else if (data.requireMFASetup) {
-        setMasterPassword(password);
+        flushSync(() => setMasterPassword(password));
         localStorage.setItem("userId", data.userId);
         navigate("/mfa-setup");
       }
     } catch (err) {
+      setMasterPassword("");
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
