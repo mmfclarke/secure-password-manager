@@ -35,5 +35,5 @@ export function decrypt(ciphertext, iv, salt, masterPassword) {
   });
 
   const decrypted = CryptoJS.AES.decrypt(cipherParams, key, { iv: ivWords });
-  return decrypted.toString(CryptoJS.enc.UTF8);
+  return decrypted.toString(CryptoJS.enc.Utf8);
 }
