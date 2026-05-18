@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Check, Circle } from "lucide-react";
 import styles from "../styles/Register.module.css";
 
 export default function Register({ setMasterPassword }) {
@@ -11,8 +12,22 @@ export default function Register({ setMasterPassword }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const requirements = [
+    { key: "length", label: "At least 12 characters", met: password.length >= 12 },
+    { key: "upper", label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { key: "lower", label: "One lowercase letter", met: /[a-z]/.test(password) },
+    { key: "number", label: "One number", met: /[0-9]/.test(password) },
+    { key: "special", label: "One special character", met: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) },
+  ];
+  const allMet = requirements.every((r) => r.met);
+
   const handleRegister = async () => {
     setError("");
+
+    if (!allMet) {
+      setError("Password does not meet all requirements");
+      return;
+    }
 
     if (password !== confirm) {
       setError("Passwords do not match");
@@ -61,6 +76,14 @@ export default function Register({ setMasterPassword }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <ul className={styles.requirements}>
+            {requirements.map((r) => (
+              <li key={r.key} className={r.met ? styles.met : styles.unmet}>
+                {r.met ? <Check size={12} /> : <Circle size={12} />}
+                {r.label}
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className={styles.field}>

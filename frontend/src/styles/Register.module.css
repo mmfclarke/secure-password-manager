@@ -14,6 +14,20 @@
   padding: 40px;
   width: 100%;
   max-width: 400px;
+  box-sizing: border-box;
+  margin: 16px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: calc(100% - 32px);
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 28px;
+  }
 }
 
 .logoRow {
@@ -74,6 +88,30 @@
 
 .input:focus {
   border-color: #111;
+}
+
+.requirements {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.requirements li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.met {
+  color: #16a34a;
+}
+
+.unmet {
+  color: #999;
 }
 
 .button {
