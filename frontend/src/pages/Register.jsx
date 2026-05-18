@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Check, Circle } from "lucide-react";
@@ -37,10 +38,11 @@ export default function Register({ setMasterPassword }) {
     setLoading(true);
     try {
       const { data } = await axios.post("/api/auth/register", { email, password });
-      setMasterPassword(password);
+      flushSync(() => setMasterPassword(password));
       localStorage.setItem("userId", data.userId);
       navigate("/mfa-setup");
     } catch (err) {
+      setMasterPassword("");
       setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
