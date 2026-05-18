@@ -4,6 +4,9 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+const DUMMY_HASH =
+  "$2b$10$KbQiQjV0Vf8zQm6dW1Lh0eT9M7P7yVQeKxQ9lD0hR3YwzP6mXkT2W";
+
 // INPUT VALIDATION 
 function validateAuthInput(body, { strongPassword }) {
 
@@ -124,14 +127,15 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+      // Prevent timing-based enumeration
+      await bcrypt.compare(password, DUMMY_HASH);
+
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check if account is locked 
     if (user.lockoutUntil && user.lockoutUntil > Date.now()) {
-      return res.status(403).json({
-        message: "Account locked due to too many failed attempts. Try again later."
-      });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Reset lockout if expired
@@ -161,9 +165,7 @@ router.post("/login", async (req, res) => {
         updated.lockoutUntil = Date.now() + 15 * 60 * 1000;
         await updated.save();
 
-        return res.status(403).json({
-          message: "Account locked due to too many failed attempts.",
-        });
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
       return res.status(401).json({ message: "Invalid credentials" });
