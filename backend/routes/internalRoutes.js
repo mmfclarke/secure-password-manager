@@ -32,8 +32,8 @@ router.put("/users/:userId/totp", async (req, res) => {
       typeof totpSecret !== "string" ||
       !/^[A-Z2-7]{16,64}$/.test(totpSecret)
     ) {
-      return res.status(400).json
-      ({ message: "Invalid TOTP secret format" 
+      return res.status(400).json({
+        message: "Invalid TOTP secret format" 
       });
     }
     const user = await User.findByIdAndUpdate(
