@@ -39,6 +39,8 @@ export default function Vault({ masterPassword, setMasterPassword }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fp = (s) => `len=${s?.length ?? 0} cp=${s ? [...s].map(c => c.codePointAt(0).toString(16)).join(" ") : "-"}`;
+    console.log("[vault-debug] effect run, mp:", fp(masterPassword));
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
@@ -60,6 +62,7 @@ export default function Vault({ masterPassword, setMasterPassword }) {
 
         let decrypted;
         try {
+          console.log("[vault-debug] about to decrypt, mp:", fp(masterPassword), "creds:", data.length);
           decrypted = data.map((cred) => {
             const { username, password } = JSON.parse(
               decrypt(cred.encryptedData.ciphertext, cred.encryptedData.iv, cred.encryptedData.salt, masterPassword)
@@ -67,6 +70,7 @@ export default function Vault({ masterPassword, setMasterPassword }) {
             return { ...cred, username, password };
           });
         } catch {
+          console.log("[vault-debug] decrypt failed with mp:", fp(masterPassword));
           setMasterPassword("");
           setUnlockError("Incorrect master password. Try again.");
           return;
@@ -107,6 +111,8 @@ export default function Vault({ masterPassword, setMasterPassword }) {
       setUnlockError("Enter your master password");
       return;
     }
+    const fp = (s) => `len=${s?.length ?? 0} cp=${s ? [...s].map(c => c.codePointAt(0).toString(16)).join(" ") : "-"}`;
+    console.log("[vault-debug] handleUnlock fired, unlockInput:", fp(unlockInput));
     setUnlockError("");
     setMasterPassword(unlockInput);
     setUnlockInput("");
