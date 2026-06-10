@@ -3,7 +3,8 @@
 A free, open-source password manager with client-side AES-256 encryption, TOTP-based MFA, and full code transparency.
 
 **Status:** CS 467 Online Capstone — Spring 2026  
-**Live:** https://vault.neuralnetworks.me/
+**Live:** https://vault.neuralnetworks.me/    
+**User Guide:** [User Guide](documents/UserGuide.pdf)
 
 ---
 
